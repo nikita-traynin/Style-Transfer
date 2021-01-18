@@ -9,8 +9,8 @@ from torch import optim
 # Wikipedia: https://en.wikipedia.org/wiki/Neural_Style_Transfer
 
 # Choose the images you want to work with
-style_image_name = 'van-gogh-starry-night.png'
-content_image_name = 'dog.jpg'
+style_image_name = 'the-scream.jpg'
+content_image_name = 'northwest-landscape.jpg'
 
 #
 if torch.cuda.is_available():
@@ -29,7 +29,7 @@ for param in vgg19.parameters():
 
 def load_image(image_path):
     image = Image.open(image_path).convert('RGB')
-    in_transform = transforms.Compose([transforms.Resize(256),
+    in_transform = transforms.Compose([transforms.Resize(224),
                                        transforms.CenterCrop(224),
                                        transforms.ToTensor(),
                                        transforms.Normalize((0.485, 0.456, 0.406),
@@ -113,15 +113,15 @@ style_grams = {layer: gram_matrix(style_features[layer]) for layer in style_feat
 
 # Set weights for each "style" layer as prescribed in the paper
 # Have them add up to one, keep them equal for now but can experiment
-style_weights = {'conv1_1': 0.2,
-                 'conv2_1': 0.2,
-                 'conv3_1': 0.2,
+style_weights = {'conv1_1': 1.0,
+                 'conv2_1': 0.8,
+                 'conv3_1': 0.4,
                  'conv4_1': 0.2,
-                 'conv5_1': 0.2}
+                 'conv5_1': 0.1}
 
 # Set weight for loss function
 content_weight = 1  # alpha
-style_weight = 1e2  # beta
+style_weight = 2e5  # beta
 
 # The image we are generating
 target_image = content_image.clone().requires_grad_(True).to(dev)
@@ -130,10 +130,10 @@ target_image = content_image.clone().requires_grad_(True).to(dev)
 optimizer = optim.Adam([target_image], lr=0.003)
 
 # The number of iterations we run
-steps = 500
+steps = 1000
 
 # Interval for displaying intermediate results
-display_interval = 10
+display_interval = 999999 # for now: no displaying to avoid blocking
 
 for iter_count in range(1, steps+1):
     target_features = get_features(target_image, vgg19)
@@ -159,7 +159,7 @@ for iter_count in range(1, steps+1):
         show_image(target_image)
 
 # Now our target image has been created; let's save it
-final_image = Image.fromarray(show_image(target_image))
+final_image = Image.fromarray((show_image(target_image) * 255).astype(np.uint8))
 final_image.save('img/output/' + content_image_name[:-4] + '-' + style_image_name[:-4] + '.jpg')
 
 
