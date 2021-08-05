@@ -1,0 +1,14 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #ffee99;
+}
+
+.dropzone {
+  border-radius: 2px;
+  border-style: dashed;
+  border-color: #4281a4;
+  background-color: #c9f0ff;
+}

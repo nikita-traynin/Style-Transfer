@@ -133,7 +133,7 @@ optimizer = optim.Adam([target_image], lr=0.003)
 steps = 1000
 
 # Interval for displaying intermediate results
-display_interval = 999999 # for now: no displaying to avoid blocking
+display_interval = 50 # for now: no displaying to avoid blocking
 
 for iter_count in range(1, steps+1):
     target_features = get_features(target_image, vgg19)
@@ -161,5 +161,3 @@ for iter_count in range(1, steps+1):
 # Now our target image has been created; let's save it
 final_image = Image.fromarray((show_image(target_image) * 255).astype(np.uint8))
 final_image.save('img/output/' + content_image_name[:-4] + '-' + style_image_name[:-4] + '.jpg')
-
-
