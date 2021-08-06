@@ -3,12 +3,12 @@
 }
 
 body {
-  background-color: #ffee99;
+  background-color: #ffec8b;
 }
 
 .dropzone {
   border-radius: 2px;
   border-style: dashed;
-  border-color: #4281a4;
+  border-color: #212529;
   background-color: #c9f0ff;
 }
