@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect
 from werkzeug.utils import secure_filename
 import os
+from styletransfer import st
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'img'
@@ -34,3 +35,14 @@ def upload_file():
         print(dest)
         file.save(dest)
         return redirect('/')
+
+@app.route('/render', methods=['POST'])
+def render():
+    content = 'northwest-landscape.jpg'
+    style = 'the-scream.jpg'
+    output_name = st(content, style)
+
+
+@app.route('/download', method=['GET'])
+def dl():
+    return send_from_directory('img/output', 'northwest-landscape-the-scream.jpg')
