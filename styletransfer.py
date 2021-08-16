@@ -4,6 +4,7 @@ import torch
 from torchvision import transforms, models
 import numpy as np
 from torch import optim
+import redis
 
 # Original 2016 paper by Gatys et al: https://arxiv.org/pdf/1508.06576.pdf
 # Wikipedia: https://en.wikipedia.org/wiki/Neural_Style_Transfer
@@ -74,6 +75,13 @@ def show_image(tensor):
 
 # TODO: a function that takes the name of two images and returnes the style transfered results
 def st(content_image_name, style_image_name):
+    # initialize redis object for rendering progress updates
+    rds = redis.Redis(db=0)
+    rds.flushall()
+    rds.set("render_progress", "0")
+    if not rds.ping():
+        return "redis_error"
+
     # # Choose the images you want to work with
     # style_image_name = 'the-scream.jpg'
     # content_image_name = 'northwest-landscape.jpg'
@@ -155,7 +163,8 @@ def st(content_image_name, style_image_name):
         optimizer.step()
 
         if iter_count % display_interval == 0:
-            print('\n\n', iter_count)
+            rds.set("render_progress", str(iter_count))
+            # print('\n\n', iter_count)
             # show_image(target_image)
 
     # Now our target image has been created; let's save it

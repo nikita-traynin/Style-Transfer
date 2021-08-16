@@ -43,6 +43,8 @@ def render():
     content = 'northwest-landscape.jpg'
     style = 'the-scream.jpg'
     output_name = st(content, style)
+    if output_name == "redis_error":
+        render_template("There was a redis error. The server is not pinging back.")
 
 
 @app.route('/download', methods=['GET'])
