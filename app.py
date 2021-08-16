@@ -10,6 +10,7 @@ app.config['UPLOAD_FOLDER'] = 'img'
 def hello_world():
     return render_template('home.html')
 
+
 @app.route('/file-upload', methods=['POST'])
 def upload_file():
     if 'content' in request.files:
@@ -36,6 +37,7 @@ def upload_file():
         file.save(dest)
         return redirect('/')
 
+
 @app.route('/render', methods=['POST'])
 def render():
     content = 'northwest-landscape.jpg'
@@ -43,6 +45,6 @@ def render():
     output_name = st(content, style)
 
 
-@app.route('/download', method=['GET'])
+@app.route('/download', methods=['GET'])
 def dl():
     return send_from_directory('img/output', 'northwest-landscape-the-scream.jpg')

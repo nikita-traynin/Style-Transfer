@@ -132,7 +132,7 @@ def st(content_image_name, style_image_name):
     steps = 1000
 
     # Interval for displaying intermediate results
-    display_interval = 50 # for now: no displaying to avoid blocking
+    display_interval = 5 # for now: no displaying to avoid blocking
 
     for iter_count in range(1, steps+1):
         target_features = get_features(target_image, vgg19)
@@ -155,6 +155,7 @@ def st(content_image_name, style_image_name):
         optimizer.step()
 
         if iter_count % display_interval == 0:
+            print('\n\n', iter_count)
             # show_image(target_image)
 
     # Now our target image has been created; let's save it
