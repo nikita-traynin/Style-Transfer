@@ -2,6 +2,9 @@ from flask import Flask, render_template, request, redirect
 from werkzeug.utils import secure_filename
 import os
 from styletransfer import st
+import redis
+import concurrent.futures
+import time
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'img'
@@ -42,11 +45,35 @@ def upload_file():
 def render():
     content = 'northwest-landscape.jpg'
     style = 'the-scream.jpg'
-    output_name = st(content, style)
+
+    # multithreading executor
+    executor = concurrent.futures.ThreadPoolExecutor()
+
+    # rendering thread
+    render_future = executor.submit(st, content, style)
+
+    # progress updating thread
+    rds = redis.Redis()
+    prog_future = executor.submit(progress_update, rds)
+
+    # get output file name and download the file
+    output_name = render_future.result()
     if output_name == "redis_error":
-        render_template("There was a redis error. The server is not pinging back.")
+        return render_template("There was a redis error in style transfer. The server is not pinging back.")
+    dl(output_name)
+
+    return redirect('/')
+
+
+def progress_update(rds):
+    while(true):
+        time.sleep(1)
+        iter = rds.get('render_progress')
+        if iter == 1000:
+            break
+
 
 
 @app.route('/download', methods=['GET'])
-def dl():
-    return send_from_directory('img/output', 'northwest-landscape-the-scream.jpg')
+def dl(output_name):
+    return send_from_directory('img/output', output_name)#'northwest-landscape-the-scream.jpg')
