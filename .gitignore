@@ -1,5 +1,24 @@
-venv/
+# IDE
 .idea/
-__pycache__/
-passwords
+
+# Customer Data
 img/
+
+# Python venvs - local
+venv/
+
+# Pyc files
+*.pyc
+__pycache__/
+
+instance/
+
+# Py tests
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Packaging
+dist/
+build/
+*.egg-info/
