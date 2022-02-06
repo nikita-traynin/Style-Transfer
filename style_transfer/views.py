@@ -1,13 +1,14 @@
 from flask import Flask, render_template, request, redirect, send_from_directory
 from werkzeug.utils import secure_filename
 import os
-from styletransfer import st
 import redis
 import concurrent.futures
 import time
 from style_transfer import app
 # from flask_executor import Executor
 
+def dookie(i):
+    print(str(i) + '\n\n\n')
 app.config['UPLOAD_FOLDER'] = 'img'
 # executor = Executor(app)
 
