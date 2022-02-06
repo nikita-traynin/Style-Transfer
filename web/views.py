@@ -4,11 +4,9 @@ import os
 import redis
 import concurrent.futures
 import time
-from style_transfer import app
+from web import app
 # from flask_executor import Executor
 
-def dookie(i):
-    print(str(i) + '\n\n\n')
 app.config['UPLOAD_FOLDER'] = 'img'
 # executor = Executor(app)
 
