@@ -9,7 +9,7 @@ from MLModel import app
 # Original 2016 paper by Gatys et al: https://arxiv.org/pdf/1508.06576.pdf
 # Wikipedia: https://en.wikipedia.org/wiki/Neural_Style_Transfer
 
-@app.route('/render')
+@app.route('/init')
 def style_transfer_alg():
     # Choose the images you want to work with
     style_image_name = 'the-scream.jpg'

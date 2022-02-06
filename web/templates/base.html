@@ -10,7 +10,15 @@
   <link rel="stylesheet" href="static/css/base.css">
 
 </head>
-
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
 <body>
   <main>
     {% block content %}{% endblock %}

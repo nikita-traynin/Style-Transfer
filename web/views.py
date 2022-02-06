@@ -14,9 +14,9 @@ app.config['UPLOAD_FOLDER'] = 'img'
 def hello_world():
     return render_template('home.html')
 
-
 @app.route('/file-upload', methods=['POST'])
 def upload_file():
+    # the file name is configured in the dropzoneconfig.js file
     if 'content' in request.files:
         subfolder = 'content'
         file = request.files['content']
@@ -24,8 +24,7 @@ def upload_file():
         subfolder = 'style'
         file = request.files['style']
     else:
-        print('\n\n\n', request.files)
-        print('File upload name neither content nor style, exiting')
+        flash('The file which was attempted to upload did not have name \"content\" or \"style\" so it will not be uploaded.')
         return redirect('/')
 
     # if no file uploaded, display error msg
@@ -45,7 +44,6 @@ def upload_file():
 
 @app.route('/render', methods=['POST'])
 def render():
-    rds = redis.Redis()
     content = rds.get('content_name')#'northwest-landscape.jpg'
     style = rds.get('style_name')#'the-scream.jpg'
 
