@@ -5,15 +5,15 @@ import redis
 import concurrent.futures
 import time
 from web import app
-# from flask_executor import Executor
 
 app.config['UPLOAD_FOLDER'] = 'img'
-# executor = Executor(app)
 
+# the home page.
 @app.route('/')
 def hello_world():
     return render_template('home.html')
 
+# upload files to the web app. this is only for the two images necessary
 @app.route('/file-upload', methods=['POST'])
 def upload_file():
     # the file name is configured in the dropzoneconfig.js file
@@ -27,16 +27,14 @@ def upload_file():
         flash('The file which was attempted to upload did not have name \"content\" or \"style\" so it will not be uploaded.')
         return redirect('/')
 
-    # if no file uploaded, display error msg
+    # something is wrong
     if file.filename == '':
-        flash('No selected file')
+        flash('File python object\'s \"filename\" property is an empty string. ')
         return redirect('/')
 
-    # if there is a file, save it
-    if file:
-        rds = redis.Redis()
+    # store file locally during dev. later, use remote store or other more robust solution
+    else:
         filename = secure_filename(file.filename)
-        rds.set(subfolder + '_name', filename)
         dest = os.path.join(app.config['UPLOAD_FOLDER'], subfolder, filename)
         file.save(dest)
         return redirect('/')
