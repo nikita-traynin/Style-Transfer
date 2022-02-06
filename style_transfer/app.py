@@ -5,7 +5,7 @@ from styletransfer import st
 import redis
 import concurrent.futures
 import time
-from style-transfer import app
+from style_transfer import app
 # from flask_executor import Executor
 
 app.config['UPLOAD_FOLDER'] = 'img'
