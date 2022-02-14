@@ -5,39 +5,58 @@ import redis
 import concurrent.futures
 import time
 from web import app
+from flask import session
+from datetime import timedelta
+import string
+import random
+import http
 
-app.config['UPLOAD_FOLDER'] = 'img'
+app.secret_key = os.environ.get('SESSION_SECRET_KEY')
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(5)
+app.config['UPLOAD_DIRECTORY'] = 'C:/Users/theni/Documents/Style-Transfer/img'
+
+
+@app.before_request
+def renew_session():
+    session.permanent = True
+    session.modified = True
+
 
 # the home page.
 @app.route('/')
 def hello_world():
+    if 'id' not in session:
+        id_chars = string.ascii_letters + string.digits
+        session['id'] = ''.join(random.choice(id_chars) for i in range(15))
     return render_template('home.html')
 
 # upload files to the web app. this is only for the two images necessary
 @app.route('/file-upload', methods=['POST'])
 def upload_file():
-    # the file name is configured in the dropzoneconfig.js file
+    # the file "type" is configured in the dropzoneconfig.js file
+    # wz_file is a werkzeug FileStorage object
     if 'content' in request.files:
-        subfolder = 'content'
-        file = request.files['content']
+        type = 'content'
+        wz_file = request.files['content']
     elif 'style' in request.files:
-        subfolder = 'style'
-        file = request.files['style']
+        type = 'style'
+        wz_file = request.files['style']
     else:
         flash('The file which was attempted to upload did not have name \"content\" or \"style\" so it will not be uploaded.')
-        return redirect('/')
+        return ('', http.HTTPStatus.BAD_REQUEST)
 
     # something is wrong
-    if file.filename == '':
+    if wz_file.filename == '':
         flash('File python object\'s \"filename\" property is an empty string. ')
-        return redirect('/')
+        return ('', http.HTTPStatus.BAD_REQUEST)
 
     # store file locally during dev. later, use remote store or other more robust solution
     else:
-        filename = secure_filename(file.filename)
-        dest = os.path.join(app.config['UPLOAD_FOLDER'], subfolder, filename)
-        file.save(dest)
-        return redirect('/')
+        # user input, so use secure_filename for security
+        name = session['id'] + '_' + type + '_' + secure_filename(wz_file.filename)
+        dest = os.path.join(app.config['UPLOAD_DIRECTORY'], name)
+        wz_file.save(dest)
+        return ('', http.HTTPStatus.NO_CONTENT)
 
 
 @app.route('/render', methods=['POST'])
