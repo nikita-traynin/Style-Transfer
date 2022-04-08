@@ -1,19 +1,28 @@
-import matplotlib.pyplot as plt
 from PIL import Image
 import torch
 from torchvision import transforms, models
 import numpy as np
 from torch import optim
 from MLModel import app
+from io import BytesIO
+from flask import request
+import redis
+import requests
 
 # Original 2016 paper by Gatys et al: https://arxiv.org/pdf/1508.06576.pdf
 # Wikipedia: https://en.wikipedia.org/wiki/Neural_Style_Transfer
 
-@app.route('/init')
+app.config['VIEW_APP_URL'] = 'http://localhost:5000'
+app.config['REDIS_HOSTNAME'] = 'localhost'
+
+@app.route('/init', methods=['POST'])
 def style_transfer_alg():
+    #define Redis
+    rds = redis.Redis(host = app.config['REDIS_HOSTNAME'], port=6379)
+
     # Choose the images you want to work with
-    style_image_name = 'the-scream.jpg'
-    content_image_name = 'northwest-landscape.jpg'
+    style_image = request.files['style']
+    content_image = request.files['content']
 
     #
     if torch.cuda.is_available():
@@ -29,9 +38,8 @@ def style_transfer_alg():
     for param in vgg19.parameters():
         param.requires_grad_(False)
 
-
-    def load_image(image_path):
-        image = Image.open(image_path).convert('RGB')
+    def load_image(image):
+        image = Image.open(image).convert('RGB')
         in_transform = transforms.Compose([transforms.Resize(224),
                                            transforms.CenterCrop(224),
                                            transforms.ToTensor(),
@@ -79,7 +87,7 @@ def style_transfer_alg():
 
         return gram
 
-    def show_image(tensor):
+    def get_image_result(tensor):
         # Get rid of batch dimension, rearrange dimensions into matplot and numpy standard
         image = np.transpose(tensor.squeeze(0).clone().detach().numpy(), axes=(1, 2, 0))
 
@@ -87,25 +95,12 @@ def style_transfer_alg():
         image = image * np.array((0.229, 0.224, 0.225)) + np.array((0.485, 0.456, 0.406))
         image = image.clip(0, 1)
 
-        # display the image
-        plt.imshow(image)
-        plt.show()
-
         return image
 
 
-
-    # Get the image paths
-    style_path = 'img/style/' + style_image_name
-    content_path = 'img/content/' + content_image_name
-
     # Pre-process the images
-    style_image = load_image(style_path).to(dev)
-    content_image = load_image(content_path).to(dev)
-
-    # Display them
-    show_image(style_image)
-    show_image(content_image)
+    style_image = load_image(style_image).to(dev)
+    content_image = load_image(content_image).to(dev)
 
     # Get relevant features (dicts)
     content_features = get_features(content_image, vgg19)
@@ -133,10 +128,10 @@ def style_transfer_alg():
     optimizer = optim.Adam([target_image], lr=0.003)
 
     # The number of iterations we run
-    steps = 1000
+    steps = 5
 
     # Interval for displaying intermediate results
-    display_interval = 50 # for now: no displaying to avoid blocking
+    progress_update_interval = 10 # for now: no displaying to avoid blocking
 
     for iter_count in range(1, steps+1):
         target_features = get_features(target_image, vgg19)
@@ -158,9 +153,17 @@ def style_transfer_alg():
         total_loss.backward()
         optimizer.step()
 
-        if iter_count % display_interval == 0:
-            show_image(target_image)
+        if iter_count % progress_update_interval == 0:
+            rds.set('progress', str(iter_count/steps))
 
     # Now our target image has been created; let's save it
-    final_image = Image.fromarray((show_image(target_image) * 255).astype(np.uint8))
-    final_image.save('img/output/' + content_image_name[:-4] + '-' + style_image_name[:-4] + '.jpg')
+    final_image = Image.fromarray((get_image_result(target_image) * 255).astype(np.uint8))
+    byte_io = BytesIO()
+    final_image.save(byte_io, 'png')
+    byte_io.name = 'result.png'
+
+    r = requests.post(app.config['VIEW_APP_URL'] + '/success', files = {'file': ('result.png', byte_io, 'image/png')})
+    if r.status_code == http.HTTPStatus.NO_CONTENT:
+        return ('', http.HTTPStatus.NO_CONTENT)
+    else:
+        return ('Call to /success failed', http.HTTPStatus.INTERNAL_SERVER_ERROR)

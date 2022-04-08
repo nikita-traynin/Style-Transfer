@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, send_from_directory
+from flask import Flask, render_template, request, redirect, send_from_directory, send_file
 from werkzeug.utils import secure_filename
 import os
 import redis
@@ -10,10 +10,14 @@ from datetime import timedelta
 import string
 import random
 import http
+import re
+import requests
 
-app.secret_key = os.environ.get('SESSION_SECRET_KEY')
+# config
+app.secret_key = 'vkBW6MqvrE1MJNXqs025'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(5)
 app.config['UPLOAD_DIRECTORY'] = 'C:/Users/theni/Documents/Style-Transfer/img'
+app.config['ML_SERVER'] = 'http://localhost:5001';
 
 
 @app.before_request
@@ -22,7 +26,6 @@ def renew_session():
     session.modified = True
 
 
-# the home page.
 @app.route('/')
 def hello_world():
     if 'id' not in session:
@@ -30,11 +33,9 @@ def hello_world():
         session['id'] = ''.join(random.choice(id_chars) for i in range(15))
     return render_template('home.html')
 
-# upload files to the web app. this is only for the two images necessary
+
 @app.route('/file-upload', methods=['POST'])
 def upload_file():
-    # the file "type" is configured in the dropzoneconfig.js file
-    # wz_file is a werkzeug FileStorage object
     if 'content' in request.files:
         type = 'content'
         wz_file = request.files['content']
@@ -45,14 +46,10 @@ def upload_file():
         flash('The file which was attempted to upload did not have name \"content\" or \"style\" so it will not be uploaded.')
         return ('', http.HTTPStatus.BAD_REQUEST)
 
-    # something is wrong
     if wz_file.filename == '':
         flash('File python object\'s \"filename\" property is an empty string. ')
         return ('', http.HTTPStatus.BAD_REQUEST)
-
-    # store file locally during dev. later, use remote store or other more robust solution
     else:
-        # user input, so use secure_filename for security
         name = session['id'] + '_' + type + '_' + secure_filename(wz_file.filename)
         dest = os.path.join(app.config['UPLOAD_DIRECTORY'], name)
         wz_file.save(dest)
@@ -61,27 +58,28 @@ def upload_file():
 
 @app.route('/render', methods=['POST'])
 def render():
-    content = rds.get('content_name')#'northwest-landscape.jpg'
-    style = rds.get('style_name')#'the-scream.jpg'
+    # find two files (via session + type)
+    (_,_,files) = next(os.walk(app.config['UPLOAD_DIRECTORY']))
+    for file in files:
+        if re.match(session['id'] + '_' + 'content', file):
+            content_img = open(os.path.join(app.config['UPLOAD_DIRECTORY'], file), 'rb')
+        elif re.match(session['id'] + '_' + 'style', file):
+            style_img = open(os.path.join(app.config['UPLOAD_DIRECTORY'], file), 'rb')
 
-    # rendering and progress updating threads
-    # render_future = executor.submit(st, content, style)
+    # call ml server
+    files = {'content': content_img, 'style': style_img}
+    r = requests.post(app.config['ML_SERVER'] + '/init', files = files)
 
-    # prog_future = executor.submit(progress_update, redis.Redis())
+    return ('', http.HTTPStatus.NO_CONTENT)
 
 
-    # get output file name and download the file
-    try:
-        output_name = st(content, style) #render_future.result()
-    except:
-        return render_template("The result of the rendering process was not able to be stored.")
+@app.route('/success', methods=['POST'])
+def download():
+    file = request.files['result.png']
+    send_file(file)
 
-    if output_name == "redis_error":
-        return render_template("There was a redis error in style transfer. The server is not pinging back.")
+    return ('', http.HTTPStatus.NO_CONTENT)
 
-    # call download function
-    dl(output_name)
-    return redirect('/')
 
 @app.route('/get_progress')
 def progress_update():
@@ -92,8 +90,3 @@ def progress_update():
         return 0
     percent = (iter / 1000) * 100
     return str(percent)
-
-
-#@app.route('/download', methods=['GET'])
-def dl(output_name):
-    return send_from_directory('img/output', output_name)#'northwest-landscape-the-scream.jpg')
