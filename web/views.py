@@ -12,7 +12,11 @@ import random
 import http
 import re
 import requests
+from celery import Celery
 
+
+################## CELERY BEGIN ########################
+################## CELERY END ########################
 # config
 app.secret_key = 'vkBW6MqvrE1MJNXqs025'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(5)
