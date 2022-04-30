@@ -19,9 +19,9 @@ kiwisolver==1.3.1
 kombu==5.2.4
 MarkupSafe==2.0.1
 matplotlib==3.3.3
-numpy==1.19.5
+# numpy==1.19.5
 packaging==21.3
-Pillow==8.1.0
+# Pillow==8.1.0
 prompt-toolkit==3.0.29
 pyparsing==2.4.7
 python-dateutil==2.8.1
@@ -29,10 +29,9 @@ pytz==2022.1
 redis==4.1.2
 requests==2.27.1
 six==1.15.0
--e git+https://github.com/nikita-traynin/Style-Transfer.git@931fe199cfe69db8fed3da5498dc6caba59bd257#egg=style_transfer
-torch==1.7.1
-torchaudio==0.7.2
-torchvision==0.8.2
+# torch==1.7.1
+# torchaudio==0.7.2
+# torchvision==0.8.2
 typing-extensions==3.7.4.3
 urllib3==1.26.9
 vine==5.0.0
