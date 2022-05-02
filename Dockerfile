@@ -1,16 +1,15 @@
-FROM ubuntu
+FROM ubuntu:latest
 
 WORKDIR /project
 
 COPY requirements.txt requirements.txt
 
+# Install python, pip, venv, and project dependencies
 RUN apt update && \
     apt-get install -y python3.10 && \
-    apt-get install -y python3.10-venv && \
-    python3 -m venv /venv && \
-    . /venv/bin/activate && \
-    pip install -r requirements.txt
+    apt-get install -y python3-pip && \
+    pip3 install -r requirements.txt
 
 COPY dockertest.py dockertest.py
 
-CMD ["python3", "-m",  "dockertest"]
+CMD ["python3", "-m", "dockertest"]
