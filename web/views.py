@@ -1,26 +1,22 @@
-from flask import render_template, request, redirect, send_from_directory, send_file, flash
+from flask import Flask, render_template, request, send_file, flash, session
 from werkzeug.utils import secure_filename
 import os
 import redis
-import concurrent.futures
-import time
-from flask import session
 from datetime import timedelta
 import string
 import random
 import http
 import re
 import requests
-from celery import Celery
 
-from web import app
+app = Flask(__name__)
 
 
 ################## CELERY BEGIN ########################
 ################## CELERY END ########################
 # config
 app.secret_key = 'vkBW6MqvrE1MJNXqs025'
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(5)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=5)
 app.config['UPLOAD_DIRECTORY'] = 'C:/Users/theni/Documents/Style-Transfer/img'
 app.config['ML_SERVER'] = 'http://localhost:5001'
 
@@ -48,17 +44,18 @@ def upload_file():
         type = 'style'
         wz_file = request.files['style']
     else:
-        flash('The file which was attempted to upload did not have name \"content\" or \"style\" so it will not be uploaded.')
-        return ('', http.HTTPStatus.BAD_REQUEST)
+        flash('The file which was attempted to upload did not have name '
+              '\"content\" or \"style\" so it will not be uploaded.')
+        return '', http.HTTPStatus.BAD_REQUEST
 
     if wz_file.filename == '':
         flash('File python object\'s \"filename\" property is an empty string. ')
-        return ('', http.HTTPStatus.BAD_REQUEST)
+        return '', http.HTTPStatus.BAD_REQUEST
     else:
         name = session['id'] + '_' + type + '_' + secure_filename(wz_file.filename)
-        dest = os.path.join(app.config['UPLOAD_DIRECTORY'], name)
-        wz_file.save(dest)
-        return ('', http.HTTPStatus.NO_CONTENT)
+        dst = os.path.join(app.config['UPLOAD_DIRECTORY'], name)
+        wz_file.save(dst)
+        return '', http.HTTPStatus.OK
 
 
 @app.route('/render', methods=['POST'])
@@ -75,7 +72,7 @@ def render():
     files = {'content': content_img, 'style': style_img}
     r = requests.post(app.config['ML_SERVER'] + '/init', files = files)
 
-    return ('', http.HTTPStatus.NO_CONTENT)
+    return '', http.HTTPStatus.OK
 
 
 @app.route('/success', methods=['POST'])
@@ -83,7 +80,7 @@ def download():
     file = request.files['result.png']
     send_file(file)
 
-    return ('', http.HTTPStatus.NO_CONTENT)
+    return '', http.HTTPStatus.OK
 
 
 @app.route('/get_progress')
@@ -95,3 +92,7 @@ def progress_update():
         return 0
     percent = (iter / 1000) * 100
     return str(percent)
+
+
+if __name__ == '__main__':
+    app.run(host='127.0.0.1', port=5000, debug=True)
