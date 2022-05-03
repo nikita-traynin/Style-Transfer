@@ -3,6 +3,7 @@
 
 # Customer Data
 img/
+web/img/
 
 # Python venvs - local
 venv/

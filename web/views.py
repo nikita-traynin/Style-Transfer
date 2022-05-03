@@ -1,10 +1,9 @@
-from flask import Flask, render_template, request, redirect, send_from_directory, send_file
+from flask import render_template, request, redirect, send_from_directory, send_file, flash
 from werkzeug.utils import secure_filename
 import os
 import redis
 import concurrent.futures
 import time
-from web import app
 from flask import session
 from datetime import timedelta
 import string
@@ -14,6 +13,8 @@ import re
 import requests
 from celery import Celery
 
+from web import app
+
 
 ################## CELERY BEGIN ########################
 ################## CELERY END ########################
@@ -21,7 +22,7 @@ from celery import Celery
 app.secret_key = 'vkBW6MqvrE1MJNXqs025'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(5)
 app.config['UPLOAD_DIRECTORY'] = 'C:/Users/theni/Documents/Style-Transfer/img'
-app.config['ML_SERVER'] = 'http://localhost:5001';
+app.config['ML_SERVER'] = 'http://localhost:5001'
 
 
 @app.before_request
