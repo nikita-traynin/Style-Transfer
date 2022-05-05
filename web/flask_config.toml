@@ -1,0 +1,4 @@
+PERMANENT_SESSION_LIFETIME = 432000 # 5 days, in seconds: 5*24*60*60
+UPLOAD_DIRECTORY = "C:/Users/theni/Documents/Style-Transfer/img"
+ML_SERVER = "http://localhost:5001"
+SECRET_KEY = "vkBW6MqvrE1MJNXqs025"

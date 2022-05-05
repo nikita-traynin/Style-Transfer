@@ -1,13 +1,14 @@
 from flask import Flask, render_template, request, send_file, flash, session
 from werkzeug.utils import secure_filename
 import os
-import redis
 from datetime import timedelta
 import string
 import random
+import redis
 import http
 import re
 import requests
+import toml
 
 app = Flask(__name__)
 
@@ -15,10 +16,7 @@ app = Flask(__name__)
 ################## CELERY BEGIN ########################
 ################## CELERY END ########################
 # config
-app.secret_key = 'vkBW6MqvrE1MJNXqs025'
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=5)
-app.config['UPLOAD_DIRECTORY'] = 'C:/Users/theni/Documents/Style-Transfer/img'
-app.config['ML_SERVER'] = 'http://localhost:5001'
+app.config.from_file('flask_config.toml', load=toml.load)
 
 
 @app.before_request
