@@ -5,8 +5,10 @@
 img/
 web/img/
 
-# Python venvs - local
+# Python venvs (virtual environments)
 venv/
+web/venv/
+MLModel/venv/
 
 # Pyc files
 *.pyc
