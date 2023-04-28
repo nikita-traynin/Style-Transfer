@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, redirect
 from werkzeug.utils import secure_filename
 import os
+import config.default
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'img'
+app.config.from_object('config.default.Default')
 
 @app.route('/')
 def hello_world():
