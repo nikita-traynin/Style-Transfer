@@ -10,17 +10,14 @@ app.config.from_object('config.default.Default')
 def hello_world():
     return render_template('home.html')
 
-@app.route('/file-upload', methods=['POST'])
-def upload_file():
-    if 'content' in request.files:
-        subfolder = 'content'
-        file = request.files['content']
-    elif 'style' in request.files:
-        subfolder = 'style'
-        file = request.files['style']
+@app.route('/file-upload/<img_category>', methods=['POST'])
+def upload_file(img_category):
+    if img_category in request.files:
+        file = request.files[img_category]
     else:
         print('\n\n\n', request.files)
-        print('File upload name neither content nor style, exiting')
+        print('File missing from file upload request.')
+        flash('File missing from file upload request.')
         return redirect('/')
 
     # if no file uploaded, display error msg
@@ -31,7 +28,7 @@ def upload_file():
     # if there is a file, save it
     if file:
         filename = secure_filename(file.filename)
-        dest = os.path.join(app.config['UPLOAD_FOLDER'], subfolder, filename)
+        dest = os.path.join(app.config['UPLOAD_FOLDER'], img_category, filename)
         print(dest)
         file.save(dest)
         return redirect('/')
