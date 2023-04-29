@@ -9,8 +9,8 @@ from torch import optim
 # Wikipedia: https://en.wikipedia.org/wiki/Neural_Style_Transfer
 
 # Choose the images you want to work with
-style_image_name = 'the-scream.jpg'
-content_image_name = 'northwest-landscape.jpg'
+style_image_name = 'picasso.jpg'
+content_image_name = 'dog.jpg'
 
 #
 if torch.cuda.is_available():
