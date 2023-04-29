@@ -1,2 +1,5 @@
 class Default:
-    UPLOAD_FOLDER='img'
+    UPLOAD_FOLDER = 'img'
+
+
+default = Default()

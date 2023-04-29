@@ -1,14 +1,16 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, flash
 from werkzeug.utils import secure_filename
 import os
 import config.default
 
 app = Flask(__name__)
-app.config.from_object('config.default.Default')
+app.config.from_object(config.default.default)
+
 
 @app.route('/')
 def hello_world():
     return render_template('home.html')
+
 
 @app.route('/file-upload/<img_category>', methods=['POST'])
 def upload_file(img_category):
