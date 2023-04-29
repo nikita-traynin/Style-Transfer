@@ -3,11 +3,11 @@ import os
 from flask import request, redirect, flash
 from werkzeug.utils import secure_filename
 
-from flask_app_config import app
+from app import app
 
 
 @app.route('/file-upload/<img_category>', methods=['POST'])
-def upload_file(img_category):
+def file_upload(img_category):
     if img_category in request.files:
         file = request.files[img_category]
     else:
