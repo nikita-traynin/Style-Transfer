@@ -9,6 +9,7 @@ from flask import (
 from werkzeug.utils import secure_filename
 import os
 import boto3
+import boto3.session
 
 
 blueprint = Blueprint("home", __name__)
@@ -32,10 +33,13 @@ def file_upload(img_category):
     # if there is a file, save it
     filename = secure_filename(file.filename)
     filepath = os.path.join('img', img_category, filename)
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
     file.save(filepath)
 
     # upload to s3
-    s3 = boto3.resource('s3')
+    s3_session = boto3.session.Session(aws_access_key_id=current_app.config['AWS_ACCESS_KEY_ID'],
+                                       aws_secret_access_key=current_app.config['AWS_SECRET_ACCESS_KEY'])
+    s3 = s3_session.resource('s3')
     s3.Bucket(current_app.config['ST_S3_BUCKET']).put_object(Key=filename, Body=filepath)
     print(filepath)
 
