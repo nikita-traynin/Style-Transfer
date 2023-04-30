@@ -1,12 +1,24 @@
+from flask import (
+    render_template,
+    request,
+    redirect,
+    flash,
+    Blueprint,
+    current_app
+)
+from werkzeug.utils import secure_filename
 import os
 
-from flask import request, redirect, flash
-from werkzeug.utils import secure_filename
 
-from app import app
+blueprint = Blueprint("home", __name__)
 
 
-@app.route('/file-upload/<img_category>', methods=['POST'])
+@blueprint.route('/')
+def home():
+    return render_template('home.html')
+
+
+@blueprint.route('/file-upload/<img_category>', methods=['POST'])
 def file_upload(img_category):
     if img_category in request.files:
         file = request.files[img_category]
@@ -18,7 +30,7 @@ def file_upload(img_category):
 
     # if there is a file, save it
     filename = secure_filename(file.filename)
-    dest = os.path.join(app.config['UPLOAD_FOLDER'], img_category, filename)
+    dest = os.path.join(current_app.config['UPLOAD_FOLDER'], img_category, filename)
     print(dest)
     file.save(dest)
     return redirect('/')
