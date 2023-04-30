@@ -1,5 +1,1 @@
-class Default:
-    UPLOAD_FOLDER = 'img'
-
-
-default = Default()
+ST_S3_BUCKET = 'style-transfer-1'
