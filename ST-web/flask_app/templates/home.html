@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-sm py-4">
+  <header class="h2 border-bottom border-dark pb-2 mb-4">Style Transfer</header>
+  <div class="row pt-4">
+    <div class="col px-5 text-center">
+      <h5>Content Image</h5>
+    </div>
+    <div class="col px-5 text-center">
+      <h5>Style Image</h5>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col px-5">
+      <form action="/file-upload/content" class="dropzone" id="content-image-upload">
+      </form>
+    </div>
+    <div class="col px-5">
+      <form action="/file-upload/style" class="dropzone" id="style-image-upload">
+      </form>
+    </div>
+  </div>
+
+</div>
+
+
+<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+<script src="static/js/dropzoneconfig.js"></script>
+{% endblock %}
