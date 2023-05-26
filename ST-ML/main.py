@@ -4,6 +4,8 @@ import torch
 from torchvision import transforms, models
 import numpy as np
 from torch import optim
+from torchvision.models import VGG19_Weights
+import boto3
 
 # Original 2016 paper by Gatys et al: https://arxiv.org/pdf/1508.06576.pdf
 # Wikipedia: https://en.wikipedia.org/wiki/Neural_Style_Transfer
@@ -19,7 +21,7 @@ else:
     dev = torch.device('cpu')
 
 # Get the original VGG net model (only the feature extraction layers)
-vgg19 = models.vgg19(pretrained=True).features
+vgg19 = models.vgg19(weights=VGG19_Weights.IMAGENET1K_V1).features
 vgg19.to(dev)
 
 # Freeze the network parameters since it is pretrained and we aren't transfer learning
@@ -69,12 +71,13 @@ def gram_matrix(tensor):
     _, c, h, w = tensor.shape
 
     # Vectorize the feature, c is the channel count or "depth"
-    tensor_v = tensor.view(c, h*w)
+    tensor_v = tensor.view(c, h * w)
 
     # Compute the gram matrix
     gram = torch.mm(tensor_v, tensor_v.transpose(0, 1))
 
     return gram
+
 
 def show_image(tensor):
     # Get rid of batch dimension, rearrange dimensions into matplot and numpy standard
@@ -89,7 +92,6 @@ def show_image(tensor):
     plt.show()
 
     return image
-
 
 
 # Get the image paths
@@ -133,21 +135,21 @@ optimizer = optim.Adam([target_image], lr=0.003)
 steps = 1000
 
 # Interval for displaying intermediate results
-display_interval = 50 # for now: no displaying to avoid blocking
+display_interval = 20  # for now: no displaying to avoid blocking
 
-for iter_count in range(1, steps+1):
+for iter_count in range(1, steps + 1):
     target_features = get_features(target_image, vgg19)
 
-    content_loss = torch.mean((content_features['conv4_2'] - target_features['conv4_2'])**2)
+    content_loss = torch.mean((content_features['conv4_2'] - target_features['conv4_2']) ** 2)
 
-    #initialize the style loss
+    # initialize the style loss
     style_loss = 0
 
     # Weighted sum of the target style gram matrices
     for layer in style_weights:
         _, c, h, w = target_features[layer].shape
-        style_loss += (1 / (4 * h * h * w * w)) * style_weights[layer] * torch.mean((gram_matrix(style_features[layer]) - gram_matrix(target_features[layer]))**2)
-
+        style_loss += (1 / (4 * h * h * w * w)) * style_weights[layer] * \
+                      torch.mean((gram_matrix(style_features[layer]) - gram_matrix(target_features[layer])) ** 2)
 
     total_loss = content_weight * content_loss + style_weight * style_loss
 
