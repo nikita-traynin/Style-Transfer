@@ -6,6 +6,21 @@ import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
 from torch.optim.lr_scheduler import StepLR
 
+
+if torch.cuda.is_available():
+    device = torch.device('cuda')
+    print("\n-----------------Using GPU!!----------------\n\n")
+    print(torch.cuda.device_count())
+    print(torch.cuda.current_device())
+    print(torch.cuda.get_device_name(0))
+    print("----------------------------------------------\n")
+else:
+    device = torch.device('cpu')
+    print("\n-----------------Using CPU!!----------------\n\n")
+
+# print(torch.cuda.device_count())
+# print(torch.cuda.current_device())
+
 # Hyperparameters
 n_epochs = 10
 batch_size = 50
@@ -98,8 +113,3 @@ for epoch in range(n_epochs):
     # Testing
     print("Test accuracy: " + str(test()) + ". ")
     display_sample()
-
-
-
-
-
